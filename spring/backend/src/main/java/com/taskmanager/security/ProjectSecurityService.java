@@ -48,7 +48,7 @@ public class ProjectSecurityService {
             log.info("Checking isMember for projectId={}, userId={}", projectId, userId);
             
             return projectRepository.findById(projectId)
-                    .map(project -> {
+                    .<Boolean>map(project -> {
                         boolean isOwner = project.getOwner().getId().equals(userId);
                         boolean isMember = projectMemberRepository.findByProjectAndUser(project, user).isPresent();
                         log.info("Project found. isOwner={}, isMember={}", isOwner, isMember);
@@ -83,10 +83,10 @@ public class ProjectSecurityService {
     public boolean hasRole(Long projectId, String role) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return projectRepository.findById(projectId)
-                .map(project -> {
+                .<Boolean>map(project -> {
                     if (project.getOwner().getId().equals(user.getId())) return true;
                     return projectMemberRepository.findByProjectAndUser(project, user)
-                            .map(member -> member.getRole().name().equalsIgnoreCase(role))
+                            .<Boolean>map(member -> member.getRole().name().equalsIgnoreCase(role))
                             .orElse(false);
                 })
                 .orElse(false);

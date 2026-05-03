@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Briefcase,
+  Calendar,
+  ChevronRight,
+  FolderOpen,
+  Plus,
+  Sparkles,
+  X
+} from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Briefcase, Plus, Calendar, ArrowRight, X, FolderOpen,
-  Sparkles, ChevronRight 
-} from 'lucide-react';
-import { format } from 'date-fns';
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -59,19 +64,9 @@ const ProjectsPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-8 md:p-12 max-w-[1400px] mx-auto">
-        <div className="glass p-12 rounded-3xl text-center">
-          <p className="text-rose-400 text-lg font-medium">Failed to load projects. Please try again.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-8 md:p-12 max-w-[1400px] mx-auto">
-      {/* Header */}
+      {/* Header - Always visible */}
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary-500/10 rounded-2xl">
@@ -94,9 +89,29 @@ const ProjectsPage = () => {
         </motion.button>
       </div>
 
-      {/* Projects Grid */}
-      {projects?.length === 0 ? (
+      {/* Main Content Area */}
+      {error ? (
         <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass p-16 rounded-3xl text-center"
+        >
+          <div className="inline-flex p-5 bg-rose-500/10 rounded-2xl mb-6">
+            <AlertTriangle className="w-12 h-12 text-rose-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">Connection Error</h3>
+          <p className="text-slate-400 text-lg mb-8 max-w-md mx-auto">
+            Failed to connect to the backend. Please check your Railway environment variables (Redis password and CORS).
+          </p>
+          <button 
+            onClick={() => queryClient.invalidateQueries(['projects'])}
+            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all font-semibold"
+          >
+            Retry Connection
+          </button>
+        </motion.div>
+      ) : projects?.length === 0 ? (
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass p-16 rounded-3xl text-center"
@@ -147,8 +162,8 @@ const ProjectsPage = () => {
 
               <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
                 <Calendar className="w-4 h-4" />
-                {project.createdAt 
-                  ? format(new Date(project.createdAt), 'MMM d, yyyy') 
+                {project.createdAt
+                  ? format(new Date(project.createdAt), 'MMM d, yyyy')
                   : 'Recently created'}
               </div>
             </motion.div>
