@@ -39,10 +39,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/members")
+    @PreAuthorize("@projectSecurity.isMember(#projectId)")
     public ResponseEntity<List<com.taskmanager.domain.entity.User>> getMembers(@PathVariable Long projectId) {
-        System.out.println("DEBUG: Entering getMembers for projectId: " + projectId);
-        List<com.taskmanager.domain.entity.User> members = projectService.getProjectMembers(projectId);
-        System.out.println("DEBUG: Found " + members.size() + " members");
-        return ResponseEntity.ok(members);
+        return ResponseEntity.ok(projectService.getProjectMembers(projectId));
     }
 }
